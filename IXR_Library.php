@@ -694,8 +694,7 @@ class IXR_Client
             $fp = @fsockopen($this->server, $this->port, $errno, $errstr);
         }
         if (!$fp) {
-            $this->error = new IXR_Error(-32300, 'transport error - could not open socket');
-            return false;
+            return $this->handleError(-32300, 'transport error - could not open socket');
         }
         if (null !== $this->timeout_io) {
             stream_set_timeout($fp, $this->timeout_io);
@@ -710,8 +709,7 @@ class IXR_Client
             if (!$gotFirstLine) {
                 // Check line for '200'
                 if (strstr($line, '200') === false) {
-                    $this->error = new IXR_Error(-32300, 'transport error - HTTP status code was not 200');
-                    return false;
+                    return $this->handleError(-32300, 'transport error - HTTP status code was not 200');
                 }
                 $gotFirstLine = true;
             }
@@ -734,14 +732,12 @@ class IXR_Client
         $this->message = new IXR_Message($contents);
         if (!$this->message->parse()) {
             // XML error
-            $this->error = new IXR_Error(-32700, 'parse error. not well formed');
-            return false;
+            return $this->handleError(-32700, 'parse error. not well formed');
         }
 
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
-            $this->error = new IXR_Error($this->message->faultCode, $this->message->faultString);
-            return false;
+            return $this->handleError($this->message->faultCode, $this->message->faultString);
         }
 
         // Message must be OK
@@ -757,6 +753,12 @@ class IXR_Client
     function isError()
     {
         return (is_object($this->error));
+    }
+
+    function handleError($errorCode, $errorMessage)
+    {
+        $this->error = new IXR_Error($errorCode, $errorMessage);
+        return false;
     }
 
     function getErrorCode()
@@ -1298,8 +1300,7 @@ class IXR_ClientSSL extends IXR_Client
         // Check for 200 Code in $contents
         if (!strstr($contents, '200 OK')) {
             //There was no "200 OK" returned - we failed
-            $this->error = new IXR_Error(-32300, 'transport error - HTTP status code was not 200');
-            return false;
+            return $this->handleError(-32300, 'transport error - HTTP status code was not 200');
         }
 
         if ($this->debug) {
@@ -1314,13 +1315,11 @@ class IXR_ClientSSL extends IXR_Client
         $this->message = new IXR_Message($contents);
         if (!$this->message->parse()) {
             // XML error
-            $this->error = new IXR_Error(-32700, 'parse error. not well formed');
-            return false;
+            return $this->handleError(-32700, 'parse error. not well formed');
         }
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
-            $this->error = new IXR_Error($this->message->faultCode, $this->message->faultString);
-            return false;
+            return $this->handleError($this->message->faultCode, $this->message->faultString);
         }
 
         // Message must be OK
