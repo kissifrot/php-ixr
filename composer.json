@@ -1,5 +1,5 @@
 {
-    "name": "lsmonki/php-ixr",
+    "name": "kissifrot/php-ixr",
     "type": "library",
     "description": "Incutio XML-RPC library (IXR)",
     "keywords": ["xmlrpc","xlm-rpc", "remote procedure call", "rpc"],
