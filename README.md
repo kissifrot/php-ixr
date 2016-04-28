@@ -31,7 +31,7 @@ This package is published to [Packagist](https://packagist.org/), but if you don
     ],
 
     "require": {
-        "kissifrot/php-ixr": "1.7.*"
+        "kissifrot/php-ixr": "1.8.*"
     }
 
 To your composer.json file
