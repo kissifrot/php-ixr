@@ -133,9 +133,7 @@ class ClientSSL extends Client
         $length = $request->getLength();
         $xml = $request->getXml();
 
-        if ($this->debug) {
-            echo '<pre>' . htmlspecialchars($xml) . "\n</pre>\n\n";
-        }
+        $this->debugOutput('<pre>' . htmlspecialchars($xml) . PHP_EOL . '</pre>');
 
         //This is where we deviate from the normal query()
         //Rather than open a normal sock, we will actually use the cURL
@@ -173,8 +171,8 @@ class ClientSSL extends Client
             curl_setopt($curl, CURLOPT_SSLKEY, $this->_keyFile);
 
             if ($this->debug) {
-                echo "SSL Cert at : " . $this->_certFile . "\n";
-                echo "SSL Key at : " . $this->_keyFile . "\n";
+                $this->debugOutput('SSL Cert at : ' . $this->_certFile);
+                $this->debugOutput('SSL Key at : ' . $this->_keyFile);
             }
 
             // See if we need to give a passphrase
@@ -202,7 +200,7 @@ class ClientSSL extends Client
         }
 
         if ($this->debug) {
-            echo '<pre>' . htmlspecialchars($contents) . "\n</pre>\n\n";
+            $this->debugOutput('<pre>' . htmlspecialchars($contents) . PHP_EOL . '</pre>');
         }
         // Now parse what we've got back
         // Since 20Jun2004 (0.1.1) - We need to remove the headers first
@@ -222,5 +220,16 @@ class ClientSSL extends Client
 
         // Message must be OK
         return true;
+    }
+
+    /**
+     * Debug output, if debug is enabled
+     * @param $message
+     */
+    private function debugOutput($message)
+    {
+        if ($this->debug) {
+            echo $message . PHP_EOL;
+        }
     }
 }

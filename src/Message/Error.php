@@ -37,7 +37,6 @@ class Error
     </value>
   </fault>
 </methodResponse>
-
 EOD;
         return $xml;
     }
