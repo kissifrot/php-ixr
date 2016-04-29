@@ -93,6 +93,12 @@ class Message
         return true;
     }
 
+    /**
+     * Opening tag handler
+     * @param $parser
+     * @param $tag
+     * @param $attr
+     */
     function tagOpen($parser, $tag, $attr)
     {
         $this->_currentTagContents = '';
@@ -115,11 +121,21 @@ class Message
         }
     }
 
+    /**
+     * Character Data handler
+     * @param $parser
+     * @param $cdata
+     */
     function cdata($parser, $cdata)
     {
         $this->_currentTagContents .= $cdata;
     }
 
+    /**
+     * Closing tag handler
+     * @param $parser
+     * @param $tag
+     */
     function tagClose($parser, $tag)
     {
         $valueFlag = false;

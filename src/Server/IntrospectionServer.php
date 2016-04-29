@@ -72,7 +72,7 @@ class IntrospectionServer extends Server
         }
         $method = $this->callbacks[$methodname];
         $signature = $this->signatures[$methodname];
-        $returnType = array_shift($signature);
+        array_shift($signature);
 
         // Check the number of arguments
         if (count($args) != count($signature)) {
