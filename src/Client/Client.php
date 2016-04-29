@@ -9,7 +9,7 @@ use IXR\Request\Request;
  * IXR_Client
  *
  * @package IXR
- * @since 1.5.0
+ * @since   1.5.0
  *
  */
 class Client
@@ -91,9 +91,17 @@ class Client
         }
 
         if ($this->timeout) {
-            $fp = @fsockopen($this->server, $this->port, $errno, $errstr, $this->timeout);
+            try {
+                $fp = fsockopen($this->server, $this->port, $errno, $errstr, $this->timeout);
+            } catch (\Exception $e) {
+                $fp = false;
+            }
         } else {
-            $fp = @fsockopen($this->server, $this->port, $errno, $errstr);
+            try {
+                $fp = fsockopen($this->server, $this->port, $errno, $errstr);
+            } catch (\Exception $e) {
+                $fp = false;
+            }
         }
         if (!$fp) {
             return $this->handleError(-32300, 'transport error - could not open socket');
@@ -134,7 +142,7 @@ class Client
         $this->message = new Message($contents);
         if (!$this->message->parse()) {
             // XML error
-            return $this->handleError(-32700, 'parse error. not well formed');
+            return $this->handleError(-32700, 'Parse error. Message not well formed');
         }
 
         // Is the message a fault?
@@ -160,6 +168,7 @@ class Client
     function handleError($errorCode, $errorMessage)
     {
         $this->error = new Error($errorCode, $errorMessage);
+
         return false;
     }
 

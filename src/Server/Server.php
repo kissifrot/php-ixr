@@ -4,6 +4,7 @@ namespace IXR\Server;
 
 
 use IXR\DataType\Value;
+use IXR\Exception\ServerException;
 use IXR\Message\Error;
 use IXR\Message\Message;
 
@@ -30,7 +31,7 @@ class Server
         if (!$data) {
             if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
                 header('Content-Type: text/plain'); // merged from WP #9093
-                die('XML-RPC server accepts POST requests only.');
+                throw new ServerException('XML-RPC server accepts POST requests only.');
             }
 
             $data = file_get_contents('php://input');

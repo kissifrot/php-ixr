@@ -1,6 +1,7 @@
 <?php
 namespace IXR\Client;
 
+use IXR\Exception\ClientException;
 use IXR\Message\Message;
 use IXR\Request\Request;
 
@@ -68,8 +69,9 @@ class ClientSSL extends Client
      *
      * @since 0.1.0
      * @param string $certificateFile Filename of the client side certificate to use
-     * @param string $keyFile Filename of the client side certificate's private key
-     * @param string $keyPhrase Passphrase to unlock the private key
+     * @param string $keyFile         Filename of the client side certificate's private key
+     * @param string $keyPhrase       Passphrase to unlock the private key
+     * @throws ClientException
      */
     function setCertificate($certificateFile, $keyFile, $keyPhrase = '')
     {
@@ -77,13 +79,13 @@ class ClientSSL extends Client
         if (is_file($certificateFile)) {
             $this->_certFile = $certificateFile;
         } else {
-            die('Could not open certificate: ' . $certificateFile);
+            throw new ClientException('Could not open certificate: ' . $certificateFile);
         }
 
         if (is_file($keyFile)) {
             $this->_keyFile = $keyFile;
         } else {
-            die('Could not open private key: ' . $keyFile);
+            throw new ClientException('Could not open private key: ' . $keyFile);
         }
 
         $this->_passphrase = (string)$keyPhrase;
@@ -94,7 +96,7 @@ class ClientSSL extends Client
         if (is_file($caFile)) {
             $this->_caFile = $caFile;
         } else {
-            die('Could not open CA certificate: ' . $caFile);
+            throw new ClientException('Could not open CA certificate: ' . $caFile);
         }
     }
 

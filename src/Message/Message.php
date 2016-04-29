@@ -66,7 +66,7 @@ class Message
         xml_parser_set_option($this->_parser, XML_OPTION_CASE_FOLDING, false);
         // Set XML parser callback functions
         xml_set_object($this->_parser, $this);
-        xml_set_element_handler($this->_parser, 'tag_open', 'tag_close');
+        xml_set_element_handler($this->_parser, 'tagOpen', 'tagClose');
         xml_set_character_data_handler($this->_parser, 'cdata');
         $chunk_size = 262144; // 256Kb, parse in chunks to avoid the RAM usage on very large messages
         $final = false;
@@ -93,7 +93,7 @@ class Message
         return true;
     }
 
-    function tag_open($parser, $tag, $attr)
+    function tagOpen($parser, $tag, $attr)
     {
         $this->_currentTagContents = '';
         $this->currentTag = $tag;
@@ -120,7 +120,7 @@ class Message
         $this->_currentTagContents .= $cdata;
     }
 
-    function tag_close($parser, $tag)
+    function tagClose($parser, $tag)
     {
         $valueFlag = false;
         switch ($tag) {
