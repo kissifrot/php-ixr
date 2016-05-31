@@ -7,20 +7,20 @@ class Value
     private $data;
     private $type;
 
-    function __construct($data, $type = false)
+    function __construct($data, $type = null)
     {
         $this->data = $data;
         if (!$type) {
             $type = $this->calculateType();
         }
         $this->type = $type;
-        if ($type == 'struct') {
+        if ($type === 'struct') {
             // Turn all the values in the array in to new IXR_Value objects
             foreach ($this->data as $key => $value) {
                 $this->data[$key] = new Value($value);
             }
         }
-        if ($type == 'array') {
+        if ($type === 'array') {
             for ($i = 0, $j = count($this->data); $i < $j; $i++) {
                 $this->data[$i] = new Value($this->data[$i]);
             }
@@ -69,17 +69,13 @@ class Value
         // Return XML for this value
         switch ($this->type) {
             case 'boolean':
-                return '<boolean>' . (($this->data) ? '1' : '0') . '</boolean>';
-                break;
+                return '<boolean>' . (((bool)$this->data) ? '1' : '0') . '</boolean>';
             case 'int':
                 return '<int>' . $this->data . '</int>';
-                break;
             case 'double':
                 return '<double>' . $this->data . '</double>';
-                break;
             case 'string':
                 return '<string>' . htmlspecialchars($this->data) . '</string>';
-                break;
             case 'array':
                 $return = '<array><data>' . "\n";
                 foreach ($this->data as $item) {
@@ -97,11 +93,9 @@ class Value
                 }
                 $return .= '</struct>';
                 return $return;
-                break;
             case 'date':
             case 'base64':
                 return $this->data->getXml();
-                break;
             default:
                 return false;
         }
