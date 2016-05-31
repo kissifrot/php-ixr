@@ -139,10 +139,8 @@ class ClientSSL extends Client
         //Rather than open a normal sock, we will actually use the cURL
         //extensions to make the calls, and handle the SSL stuff.
 
-        //Since 04Aug2004 (0.1.3) - Need to include the port (duh...)
-        //Since 06Oct2004 (0.1.4) - Need to include the colon!!!
-        //        (I swear I've fixed this before... ESP in live... But anyhu...)
-        $curl = curl_init('https://' . $this->server . ':' . $this->port . $this->path);
+        $curl = curl_init('https://' . $this->server . $this->path);
+
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 
         //Since 23Jun2004 (0.1.2) - Made timeout a class field
@@ -158,7 +156,9 @@ class ClientSSL extends Client
         curl_setopt($curl, CURLOPT_HEADER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $xml);
-        curl_setopt($curl, CURLOPT_PORT, $this->port);
+        if($this->port !== 443) {
+            curl_setopt($curl, CURLOPT_PORT, $this->port);
+        }
         curl_setopt($curl, CURLOPT_HTTPHEADER, [
             "Content-Type: text/xml",
             "Content-length: {$length}"
