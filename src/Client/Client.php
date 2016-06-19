@@ -172,6 +172,11 @@ class Client
         return false;
     }
 
+    function getError()
+    {
+        return $this->error;
+    }
+
     function getErrorCode()
     {
         return $this->error->code;
