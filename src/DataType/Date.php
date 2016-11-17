@@ -31,7 +31,27 @@ class Date
 
     private function parseIso($iso)
     {
-        $this->dateTime = \DateTime::createFromFormat(\DateTime::ATOM, $iso);
+        $formats = [
+            \DateTime::ATOM,
+            /* The older version of IXR_Date (which is still used in e.g. WordPress) does not parse
+             * iso8601 dates using DateTime::createFromFormat(DateTime::ATOM,..),
+             * but using substr() with fixed offsets.
+             * The parser does not expect dashes between year, month and day.
+             * To be compatible with wordpress clients, lets mimic the behaviour here. */
+            // with timezone
+            'Ymd\TH:i:sP',
+            'Ymd\THisP',
+            // without timezone
+            'Ymd\TH:i:s',
+            'Ymd\THis',
+        ];
+
+        foreach ($formats as $format) {
+            $this->dateTime = \DateTime::createFromFormat($format, $iso);
+            if ($this->dateTime !== false) {
+                break;
+            }
+        }
     }
 
     public function getIso()
