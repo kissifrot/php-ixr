@@ -150,7 +150,7 @@ class Message
                 $valueFlag = true;
                 break;
             case 'string':
-                $value = (string)trim($this->_currentTagContents);
+                $value = (string)($this->_currentTagContents);
                 $valueFlag = true;
                 break;
             case 'dateTime.iso8601':
