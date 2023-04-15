@@ -110,7 +110,7 @@ class Message
                 $this->messageType = $tag;
                 break;
             /* Deal with stacks of arrays and structs */
-            case 'data':    // data is to all intents and puposes more interesting than array
+            case 'data':    // data is to all intents and purposes more interesting than array
                 $this->_arraystructstypes[] = 'array';
                 $this->_arraystructs[] = [];
                 break;
@@ -201,7 +201,7 @@ class Message
                     $this->_arraystructs[count($this->_arraystructs) - 1][] = $value;
                 }
             } else {
-                // Just add as a paramater
+                // Just add as a parameter
                 $this->params[] = $value;
             }
         }
