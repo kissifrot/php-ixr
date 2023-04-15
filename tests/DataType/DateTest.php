@@ -35,7 +35,7 @@ class DateTest extends TestCase
             // no time
             ['2010-08-17', 1282003200],
             [1282036980, 1282036980],
-            //            array('20100817',             1282003200), #this will NOT be parsed, but is assumed to be timestamp
+//            ['20100817', 1282003200], #this will NOT be parsed, but is assumed to be timestamp
         ];
     }
 
