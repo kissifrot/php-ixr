@@ -65,9 +65,8 @@ class Message
         // Set XML parser to take the case of tags in to account
         xml_parser_set_option($this->_parser, XML_OPTION_CASE_FOLDING, false);
         // Set XML parser callback functions
-        xml_set_object($this->_parser, $this);
-        xml_set_element_handler($this->_parser, 'tagOpen', 'tagClose');
-        xml_set_character_data_handler($this->_parser, 'cdata');
+        xml_set_element_handler($this->_parser, [$this, 'tagOpen'], [$this, 'tagClose']);
+        xml_set_character_data_handler($this->_parser, [$this, 'cdata']);
         $chunk_size = 262144; // 256Kb, parse in chunks to avoid the RAM usage on very large messages
         $final = false;
         do {
