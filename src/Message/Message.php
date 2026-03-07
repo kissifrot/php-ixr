@@ -82,7 +82,11 @@ class Message
                 break;
             }
         } while (true);
-        xml_parser_free($this->_parser);
+        if(PHP_VERSION_ID < 80000) {
+            // Manually freeing the XML parser is only necessary in PHP versions prior to 8.0
+            xml_parser_free($this->_parser);
+            unset($this->_parser); // release the reference to the parser
+        }
 
         // Grab the error messages, if any
         if ($this->messageType === 'fault') {
