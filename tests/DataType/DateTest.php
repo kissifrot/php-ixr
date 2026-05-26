@@ -3,16 +3,16 @@
 namespace IXR\tests\DataType;
 
 use IXR\DataType\Date;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class DateTest extends TestCase
 {
 
     /**
-     * @return array
      * @see testParseIso
      */
-    function provideDates()
+    static function provideDates(): array
     {
         return [
             // full datetime, different formats
@@ -39,12 +39,8 @@ class DateTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider provideDates
-     * @param mixed $input
-     * @param int $expect
-     */
-    function testParseIso($input, $expect)
+    #[DataProvider('provideDates')]
+    public function testParseIso(mixed $input, int $expect): void
     {
         $dt = new Date($input);
         $this->assertEquals($expect, $dt->getTimeStamp());

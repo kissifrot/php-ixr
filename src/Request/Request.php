@@ -12,14 +12,10 @@ use IXR\DataType\Value;
  */
 class Request
 {
-    private $method;
-    private $args;
-    private $xml;
+    private string $xml;
 
-    public function __construct($method, $args)
+    public function __construct(private string $method, private array $args)
     {
-        $this->method = $method;
-        $this->args = $args;
         $this->xml = <<<EOD
 <?xml version="1.0"?>
 <methodCall>
@@ -36,12 +32,12 @@ EOD;
         $this->xml .= '</params></methodCall>';
     }
 
-    public function getLength()
+    public function getLength(): int
     {
         return strlen($this->xml);
     }
 
-    public function getXml()
+    public function getXml(): string
     {
         return $this->xml;
     }

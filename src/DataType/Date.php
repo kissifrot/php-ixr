@@ -10,20 +10,19 @@ namespace IXR\DataType;
  */
 class Date
 {
-    /** @var \DateTime */
-    private $dateTime;
+    private \DateTime $dateTime;
 
-    public function __construct($time)
+    public function __construct(int|string $time)
     {
         // $time can be a PHP timestamp or an ISO one
-        if (is_numeric($time)) {
-            $this->parseTimestamp($time);
+        if (\is_numeric($time)) {
+            $this->parseTimestamp((int) $time);
         } else {
             $this->parseIso($time);
         }
     }
 
-    private function parseTimestamp($timestamp)
+    private function parseTimestamp(int $timestamp): void
     {
         $date = new \DateTime();
         $this->dateTime = $date->setTimestamp($timestamp);
@@ -32,24 +31,24 @@ class Date
     /**
      * Parses more or less complete iso dates and much more, if no timezone given assumes UTC
      *
-     * @param string $iso
      * @throws \Exception when no valid date is given
      */
-    protected function parseIso($iso) {
+    protected function parseIso(string $iso): void
+    {
         $this->dateTime = new \DateTime($iso, new \DateTimeZone('UTC'));
     }
 
-    public function getIso()
+    public function getIso(): string
     {
         return $this->dateTime->format(\DateTime::ATOM);
     }
 
-    public function getXml()
+    public function getXml(): string
     {
         return '<dateTime.iso8601>' . $this->getIso() . '</dateTime.iso8601>';
     }
 
-    public function getTimestamp()
+    public function getTimestamp(): int
     {
         return (int)$this->dateTime->format('U');
     }

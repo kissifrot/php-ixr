@@ -14,35 +14,33 @@ use IXR\Request\Request;
  */
 class Client
 {
-    protected $server;
-    protected $port;
-    protected $path;
-    protected $useragent;
-    protected $response;
-    /** @var bool|Message */
-    protected $message = false;
-    protected $debug = false;
-    /** @var int Connection timeout in seconds */
-    protected $timeout;
-    /** @var null|int Timeout for actual data transfer; in seconds */
-    protected $timeout_io = null;
-    protected $headers = [];
+    protected mixed $server;
+    protected mixed $port;
+    protected mixed $path;
+    protected string $useragent;
+    protected mixed $response;
+    protected bool|Message $message = false;
+    protected bool $debug = false;
+    /** Connection timeout in seconds */
+    protected int|false $timeout;
+    /** Timeout for actual data transfer; in seconds */
+    protected ?int $timeout_io = null;
+    /** @var array<string, mixed> */
+    protected array $headers = [];
 
     /**
-     * @var null|Error
-     *
      * Storage place for an error message
      */
-    private $error = null;
+    private ?Error $error = null;
 
-    public function __construct($server, $path = false, $port = 80, $timeout = 15, $timeout_io = null)
+    public function __construct(string $server, string|false $path = false, int $port = 80, int|false $timeout = 15, ?int $timeout_io = null)
     {
-        if (!$path) {
+        if (false !== $path) {
             // Assume we have been given a URL instead
             $bits = parse_url($server);
             $this->server = $bits['host'];
-            $this->port = isset($bits['port']) ? $bits['port'] : 80;
-            $this->path = isset($bits['path']) ? $bits['path'] : '/';
+            $this->port = $bits['port'] ?? 80;
+            $this->path = $bits['path'] ?? '/';
 
             // Make absolutely sure we have a path
             if (!$this->path) {
@@ -62,15 +60,15 @@ class Client
         $this->timeout_io = $timeout_io;
     }
 
-    public function query()
+    public function query(): bool
     {
         $args = func_get_args();
         $method = array_shift($args);
         $request = new Request($method, $args);
         $length = $request->getLength();
         $xml = $request->getXml();
-        $r = "\r\n";
-        $request = "POST {$this->path} HTTP/1.0$r";
+        $lineBreak = "\r\n";
+        $request = "POST {$this->path} HTTP/1.0$lineBreak";
 
         // Merged from WP #8145 - allow custom headers
         $this->headers['Host'] = $this->server;
@@ -79,9 +77,9 @@ class Client
         $this->headers['Content-Length'] = $length;
 
         foreach ($this->headers as $header => $value) {
-            $request .= "{$header}: {$value}{$r}";
+            $request .= "{$header}: {$value}{$lineBreak}";
         }
-        $request .= $r;
+        $request .= $lineBreak;
 
         $request .= $xml;
 
@@ -90,7 +88,7 @@ class Client
             echo '<pre class="ixr_request">' . htmlspecialchars($request) . "\n</pre>\n\n";
         }
 
-        if ($this->timeout) {
+        if (false !== $this->timeout) {
             try {
                 $fp = fsockopen($this->server, $this->port, $errno, $errstr, $this->timeout);
             } catch (\Exception $e) {
@@ -118,12 +116,12 @@ class Client
             $line = fgets($fp, 4096);
             if (!$gotFirstLine) {
                 // Check line for '200'
-                if (strstr($line, '200') === false) {
+                if (!str_contains($line, '200')) {
                     return $this->handleError(-32300, 'transport error - HTTP status code was not 200');
                 }
                 $gotFirstLine = true;
             }
-            if (trim($line) == '') {
+            if (trim($line) === '') {
                 $gettingHeaders = false;
             }
             if (!$gettingHeaders) {
@@ -146,7 +144,7 @@ class Client
         }
 
         // Is the message a fault?
-        if ($this->message->messageType == 'fault') {
+        if ($this->message->messageType === 'fault') {
             return $this->handleError($this->message->faultCode, $this->message->faultString);
         }
 
@@ -160,29 +158,29 @@ class Client
         return $this->message->params[0];
     }
 
-    public function isError()
+    public function isError(): bool
     {
         return (is_object($this->error));
     }
 
-    protected function handleError($errorCode, $errorMessage)
+    protected function handleError(int $errorCode, string $errorMessage): false
     {
         $this->error = new Error($errorCode, $errorMessage);
 
         return false;
     }
 
-    public function getError()
+    public function getError(): ?Error
     {
         return $this->error;
     }
 
-    public function getErrorCode()
+    public function getErrorCode(): int
     {
         return $this->error->code;
     }
 
-    public function getErrorMessage()
+    public function getErrorMessage(): string
     {
         return $this->error->message;
     }
@@ -190,18 +188,16 @@ class Client
 
     /**
      * Gets the current timeout set for data transfer
-     * @return int|null
      */
-    public function getTimeoutIo()
+    public function getTimeoutIo(): ?int
     {
         return $this->timeout_io;
     }
 
     /**
      * Sets the timeout for data transfer
-     * @param int $timeout_io
      */
-    public function setTimeoutIo($timeout_io)
+    public function setTimeoutIo(int $timeout_io): void
     {
         $this->timeout_io = $timeout_io;
     }

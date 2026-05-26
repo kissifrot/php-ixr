@@ -15,7 +15,9 @@ Don't however be fooled by its simple surface. The library includes a wide varie
 ## Background / History
 
 The original XML-RPC library was developed back in 2002 and updated through 2010 by Incutio for a number of projects the company was working on at the time. It has become fairly dated but is still used extensively by a wide range of commercial and open-source projects.
-This fork makes it usable on more recent systems (PHP 5.4+ ones)
+This fork makes it usable on more recent systems (PHP 8.2+ ones)
+
+**_Note: This library is now only compatible with PHP 8.2 and later. For earlier versions you can still use the 1.x branch_**
 
 ## Composer
 
@@ -31,7 +33,7 @@ This package is published to [Packagist](https://packagist.org/), but if you don
     ],
 
     "require": {
-        "kissifrot/php-ixr": "1.8.*"
+        "kissifrot/php-ixr": "^2.0"
     }
 
 To your `composer.json` file
