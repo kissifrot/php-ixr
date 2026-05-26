@@ -51,50 +51,54 @@ class IntrospectionServer extends Server
         );
     }
 
-    public function addCallback($method, $callback, $args, $help)
+    public function addCallback(string $method, string $callback, array $args, string $help): void
     {
         $this->callbacks[$method] = $callback;
         $this->signatures[$method] = $args;
         $this->help[$method] = $help;
     }
 
-    public function call($methodname, $args)
+    /**
+     * @param array<mixed>|mixed|null $args
+     * @return Error|mixed
+     */
+    public function call(string $methodName, mixed $args): mixed
     {
         // Make sure it's in an array
-        if ($args && !is_array($args)) {
+        if ($args && !\is_array($args)) {
             $args = [$args];
         }
 
         // Over-rides default call method, adds signature check
-        if (!$this->hasMethod($methodname)) {
+        if (!$this->hasMethod($methodName)) {
             return new Error(-32601,
-                'server error. requested method "' . $this->message->methodName . '" not specified.');
+                \sprintf('server error. requested method "%s" not specified.', $this->message->methodName));
         }
-        $method = $this->callbacks[$methodname];
-        $signature = $this->signatures[$methodname];
+        $method = $this->callbacks[$methodName];
+        $signature = $this->signatures[$methodName];
         array_shift($signature);
 
         // Check the number of arguments
-        if (count($args) != count($signature)) {
+        if (\count($args) !== \count($signature)) {
             return new Error(-32602, 'server error. wrong number of method parameters');
         }
 
         // Check the argument types
         $ok = true;
         $argsbackup = $args;
-        for ($i = 0, $j = count($args); $i < $j; $i++) {
+        for ($i = 0, $j = \count($args); $i < $j; $i++) {
             $arg = array_shift($args);
             $type = array_shift($signature);
             switch ($type) {
                 case 'int':
                 case 'i4':
-                    if (is_array($arg) || !is_int($arg)) {
+                    if (\is_array($arg) || !\is_int($arg)) {
                         $ok = false;
                     }
                     break;
                 case 'base64':
                 case 'string':
-                    if (!is_string($arg)) {
+                    if (!\is_string($arg)) {
                         $ok = false;
                     }
                     break;
@@ -105,7 +109,7 @@ class IntrospectionServer extends Server
                     break;
                 case 'float':
                 case 'double':
-                    if (!is_float($arg)) {
+                    if (!\is_float($arg)) {
                         $ok = false;
                     }
                     break;
@@ -121,13 +125,13 @@ class IntrospectionServer extends Server
             }
         }
         // It passed the test - run the "real" method call
-        return parent::call($methodname, $argsbackup);
+        return parent::call($methodName, $argsbackup);
     }
 
-    public function methodSignature($method)
+    public function methodSignature($method): Error|array
     {
         if (!$this->hasMethod($method)) {
-            return new Error(-32601, 'server error. requested method "' . $method . '" not specified.');
+            return new Error(-32601, \sprintf('server error. requested method "%s" not specified.', $method));
         }
         // We should be returning an array of types
         $types = $this->signatures[$method];

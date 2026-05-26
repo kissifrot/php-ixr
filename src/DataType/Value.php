@@ -4,55 +4,49 @@ namespace IXR\DataType;
 
 class Value
 {
-    private $data;
-    private $type;
-
-    public function __construct($data, $type = null)
+    public function __construct(private mixed $data, private ?string $type = null)
     {
-        $this->data = $data;
-        if (!$type) {
-            $type = $this->calculateType();
-        }
-        $this->type = $type;
+        $this->type = $type ?? $this->calculateType();
         if ($type === 'struct') {
             // Turn all the values in the array in to new IXR_Value objects
             foreach ($this->data as $key => $value) {
                 $this->data[$key] = new Value($value);
             }
+            return;
         }
         if ($type === 'array') {
-            for ($i = 0, $j = count($this->data); $i < $j; $i++) {
+            for ($i = 0, $j = \count($this->data); $i < $j; $i++) {
                 $this->data[$i] = new Value($this->data[$i]);
             }
         }
     }
 
-    public function calculateType()
+    public function calculateType(): string
     {
         if ($this->data === true || $this->data === false) {
             return 'boolean';
         }
-        if (is_integer($this->data)) {
+        if (\is_integer($this->data)) {
             return 'int';
         }
-        if (is_double($this->data)) {
+        if (\is_double($this->data)) {
             return 'double';
         }
 
         // Deal with IXR object types base64 and date
-        if (is_object($this->data) && $this->data instanceof Date) {
+        if (\is_object($this->data) && $this->data instanceof Date) {
             return 'date';
         }
-        if (is_object($this->data) && $this->data instanceof Base64) {
+        if (\is_object($this->data) && $this->data instanceof Base64) {
             return 'base64';
         }
 
         // If it is a normal PHP object convert it in to a struct
-        if (is_object($this->data)) {
+        if (\is_object($this->data)) {
             $this->data = get_object_vars($this->data);
             return 'struct';
         }
-        if (!is_array($this->data)) {
+        if (!\is_array($this->data)) {
             return 'string';
         }
 
@@ -64,7 +58,7 @@ class Value
         }
     }
 
-    public function getXml()
+    public function getXml(): false|string
     {
         // Return XML for this value
         switch ($this->type) {
@@ -83,7 +77,6 @@ class Value
                 }
                 $return .= '</data></array>';
                 return $return;
-                break;
             case 'struct':
                 $return = '<struct>' . "\n";
                 foreach ($this->data as $name => $value) {
@@ -103,11 +96,8 @@ class Value
 
     /**
      * Checks whether the supplied array is a struct or not
-     *
-     * @param array $array
-     * @return boolean
      */
-    public function isStruct($array)
+    public function isStruct(array $array): bool
     {
         $expected = 0;
         foreach ($array as $key => $value) {

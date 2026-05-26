@@ -9,15 +9,16 @@ namespace IXR\Client;
  */
 class ClientMulticall extends Client
 {
-    private $calls = [];
+    /** @var array<mixed> */
+    private array $calls = [];
 
-    public function __construct($server, $path = false, $port = 80)
+    public function __construct(string $server, string|false $path = false, int $port = 80)
     {
         parent::__construct($server, $path, $port);
         $this->useragent = 'The Incutio XML-RPC PHP Library (multicall client)';
     }
 
-    public function addCall()
+    public function addCall(): void
     {
         $args = func_get_args();
         $methodName = array_shift($args);
@@ -28,7 +29,7 @@ class ClientMulticall extends Client
         $this->calls[] = $struct;
     }
 
-    public function query()
+    public function query(): bool
     {
         // Prepare multicall, then call the parent::query() method
         return parent::query('system.multicall', $this->calls);

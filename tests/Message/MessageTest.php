@@ -5,10 +5,10 @@ namespace IXR\tests\Message;
 use IXR\Message\Message;
 use PHPUnit\Framework\TestCase;
 
-class ixr_library_ixr_message_test extends TestCase
+class MessageTest extends TestCase
 {
 
-    function testUntypedValue()
+    public function testUntypedValue(): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
                 <methodCall>
@@ -23,12 +23,12 @@ class ixr_library_ixr_message_test extends TestCase
         $ixrmsg = new Message($xml);
         $ixrmsg->parse();
 
-        $this->assertEquals($ixrmsg->messageType, 'methodCall');
-        $this->assertEquals($ixrmsg->methodName, 'wiki.getBackLinks');
-        $this->assertEquals($ixrmsg->params, [' change  ']);
+        $this->assertEquals('methodCall', $ixrmsg->messageType);
+        $this->assertEquals('wiki.getBackLinks', $ixrmsg->methodName);
+        $this->assertEquals([' change  '], $ixrmsg->params);
     }
 
-    function testStringValue()
+    public function testStringValue(): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
                 <methodCall>
@@ -45,12 +45,12 @@ class ixr_library_ixr_message_test extends TestCase
         $ixrmsg = new Message($xml);
         $ixrmsg->parse();
 
-        $this->assertEquals($ixrmsg->messageType, 'methodCall');
-        $this->assertEquals($ixrmsg->methodName, 'wiki.getBackLinks');
-        $this->assertEquals($ixrmsg->params, [' change  ']);
+        $this->assertEquals('methodCall', $ixrmsg->messageType);
+        $this->assertEquals('wiki.getBackLinks', $ixrmsg->methodName);
+        $this->assertEquals([' change  '], $ixrmsg->params);
     }
 
-    function testEmptyValue()
+    public function testEmptyValue(): void
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
                 <methodCall>
@@ -67,12 +67,12 @@ class ixr_library_ixr_message_test extends TestCase
         $ixrmsg = new Message($xml);
         $ixrmsg->parse();
 
-        $this->assertEquals($ixrmsg->messageType, 'methodCall');
-        $this->assertEquals($ixrmsg->methodName, 'wiki.getBackLinks');
-        $this->assertEquals($ixrmsg->params, ['']);
+        $this->assertEquals('methodCall', $ixrmsg->messageType);
+        $this->assertEquals('wiki.getBackLinks', $ixrmsg->methodName);
+        $this->assertEquals([''], $ixrmsg->params);
     }
 
-    function testStruct()
+    public function testStruct(): void
     {
         $xml = '<?xml version=\'1.0\'?>
                 <methodCall>
@@ -102,9 +102,8 @@ class ixr_library_ixr_message_test extends TestCase
         $ixrmsg = new Message($xml);
         $ixrmsg->parse();
 
-        $this->assertEquals($ixrmsg->messageType, 'methodCall');
-        $this->assertEquals($ixrmsg->methodName, 'wiki.putPage');
-        $this->assertEquals($ixrmsg->params, ['start', 'test text   ', ['sum' => 'xmlrpc edit', 'minor' => '1']]);
+        $this->assertEquals('methodCall', $ixrmsg->messageType);
+        $this->assertEquals('wiki.putPage', $ixrmsg->methodName);
+        $this->assertEquals(['start', 'test text   ', ['sum' => 'xmlrpc edit', 'minor' => '1']], $ixrmsg->params);
     }
-
 }

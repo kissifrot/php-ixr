@@ -9,16 +9,16 @@ namespace IXR\Message;
  */
 class Error
 {
-    public $code;
-    public $message;
+    public int $code;
+    public string $message;
 
-    public function __construct($code, $message)
+    public function __construct(int|string $code, string $message)
     {
-        $this->code = $code;
+        $this->code = (int) $code;
         $this->message = htmlspecialchars($message);
     }
 
-    public function getXml()
+    public function getXml(): string
     {
         return <<<EOD
 <methodResponse>

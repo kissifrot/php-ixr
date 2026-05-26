@@ -8,15 +8,25 @@
     "authors": [
         {
             "name": "Incutio Ltd 2010 - Simon Willison",
-            "homepage": "http://scripts.incutio.com/xmlrpc/"
+            "homepage": "http://scripts.incutio.com/xmlrpc/",
+            "role": "Original Author"
+        },
+        {
+            "name": "Philippe Villiers",
+            "homepage": "https://github.com/kissifrot",
+            "role": "Maintainer"
         }
     ],
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=8.2.0",
         "ext-xml": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.0"
+        "phpunit/phpunit": "^13.0",
+        "phpstan/phpstan": "^2.1"
+    },
+    "suggest": {
+        "ext-curl": "Mandatory for ClientSSL class"
     },
     "autoload": {
         "psr-4": {

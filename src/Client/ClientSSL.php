@@ -17,42 +17,35 @@ class ClientSSL extends Client
 {
     /**
      * Filename of the SSL Client Certificate
-     * @access private
      * @since 0.1.0
-     * @var string
      */
-    private $_certFile;
+    private string|false $_certFile;
 
     /**
      * Filename of the SSL CA Certificate
-     * @access private
      * @since 0.1.0
-     * @var string
      */
-    private $_caFile;
+    private string|false $_caFile;
 
     /**
      * Filename of the SSL Client Private Key
-     * @access private
      * @since 0.1.0
-     * @var string
      */
-    private $_keyFile;
+    private string|false $_keyFile;
 
     /**
      * Passphrase to unlock the private key
-     * @access private
      * @since 0.1.0
      * @var string
      */
-    private $_passphrase;
+    private string $_passphrase;
 
     /**
      * Constructor
      * @param string $server URL of the Server to connect to
      * @since 0.1.0
      */
-    public function __construct($server, $path = false, $port = 443, $timeout = false, $timeout_io = null)
+    public function __construct(string $server, string|false $path = false, int $port = 443, int|false $timeout = false, ?int $timeout_io = null)
     {
         parent::__construct($server, $path, $port, $timeout, $timeout_io);
         $this->useragent = 'The Incutio XML-RPC PHP Library for SSL';
@@ -67,36 +60,38 @@ class ClientSSL extends Client
     /**
      * Set the client side certificates to communicate with the server.
      *
-     * @since 0.1.0
      * @param string $certificateFile Filename of the client side certificate to use
      * @param string $keyFile         Filename of the client side certificate's private key
      * @param string $keyPhrase       Passphrase to unlock the private key
      * @throws ClientException
      */
-    public function setCertificate($certificateFile, $keyFile, $keyPhrase = '')
+    public function setCertificate(string $certificateFile, string $keyFile, string $keyPhrase = ''): void
     {
         // Check the files all exist
-        if (is_file($certificateFile)) {
+        if (\is_file($certificateFile) && \is_readable($certificateFile)) {
             $this->_certFile = $certificateFile;
         } else {
-            throw new ClientException('Could not open certificate: ' . $certificateFile);
+            throw new ClientException(\sprintf('Could not open certificate: "%s"', $certificateFile));
         }
 
-        if (is_file($keyFile)) {
+        if (\is_file($keyFile) && \is_readable($certificateFile)) {
             $this->_keyFile = $keyFile;
         } else {
-            throw new ClientException('Could not open private key: ' . $keyFile);
+            throw new ClientException(\sprintf('Could not open private key: "%s"', $keyFile));
         }
 
-        $this->_passphrase = (string)$keyPhrase;
+        $this->_passphrase = $keyPhrase;
     }
 
-    public function setCACertificate($caFile)
+    /**
+     * @throws ClientException
+     */
+    public function setCACertificate(string $caFile): void
     {
-        if (is_file($caFile)) {
+        if (\is_file($caFile) && \is_readable($caFile)) {
             $this->_caFile = $caFile;
         } else {
-            throw new ClientException('Could not open CA certificate: ' . $caFile);
+            throw new ClientException(\sprintf('Could not open CA certificate: "%s"', $caFile));
         }
     }
 
@@ -106,17 +101,16 @@ class ClientSSL extends Client
      * @returns void
      * @since 0.1.2
      */
-    public function setTimeOut($newTimeOut)
+    public function setTimeOut(int $newTimeOut): void
     {
-        $this->timeout = (int)$newTimeOut;
+        $this->timeout = $newTimeOut;
     }
 
     /**
      * Returns the connection timeout (in seconds)
-     * @returns int
      * @since 0.1.2
      */
-    public function getTimeOut()
+    public function getTimeOut(): int
     {
         return $this->timeout;
     }
@@ -125,7 +119,7 @@ class ClientSSL extends Client
      * Set the query to send to the XML-RPC Server
      * @since 0.1.0
      */
-    public function query()
+    public function query(): bool
     {
         $args = func_get_args();
         $method = array_shift($args);
@@ -141,7 +135,7 @@ class ClientSSL extends Client
 
         $curl = curl_init('https://' . $this->server . $this->path);
 
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
         //Since 23Jun2004 (0.1.2) - Made timeout a class field
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->timeout);
@@ -150,11 +144,11 @@ class ClientSSL extends Client
         }
 
         if ($this->debug) {
-            curl_setopt($curl, CURLOPT_VERBOSE, 1);
+            curl_setopt($curl, CURLOPT_VERBOSE, true);
         }
 
-        curl_setopt($curl, CURLOPT_HEADER, 1);
-        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $xml);
         if($this->port !== 443) {
             curl_setopt($curl, CURLOPT_PORT, $this->port);
@@ -165,18 +159,18 @@ class ClientSSL extends Client
         ]);
 
         // Process the SSL certificates, etc. to use
-        if (!($this->_certFile === false)) {
+        if ($this->_certFile !== false) {
             // We have a certificate file set, so add these to the cURL handler
             curl_setopt($curl, CURLOPT_SSLCERT, $this->_certFile);
             curl_setopt($curl, CURLOPT_SSLKEY, $this->_keyFile);
 
             if ($this->debug) {
-                $this->debugOutput('SSL Cert at : ' . $this->_certFile);
-                $this->debugOutput('SSL Key at : ' . $this->_keyFile);
+                $this->debugOutput(\sprintf('SSL Cert at: "%s"', $this->_certFile));
+                $this->debugOutput(\sprintf('SSL Key at: "%s"', $this->_keyFile));
             }
 
             // See if we need to give a passphrase
-            if (!($this->_passphrase === '')) {
+            if ($this->_passphrase !== '') {
                 curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->_passphrase);
             }
 
@@ -194,7 +188,7 @@ class ClientSSL extends Client
         curl_close($curl);
 
         // Check for 200 Code in $contents
-        if (!strstr($contents, '200 OK') && !strstr($contents, 'HTTP/2 200')) {
+        if (!str_contains($contents, '200 OK') && !str_contains($contents, 'HTTP/2 200')) {
             //There was no "200 OK" returned - we failed
             return $this->handleError(-32300, 'transport error - HTTP status code was not 200');
         }
@@ -214,7 +208,7 @@ class ClientSSL extends Client
             return $this->handleError(-32700, 'parse error. not well formed');
         }
         // Is the message a fault?
-        if ($this->message->messageType == 'fault') {
+        if ($this->message->messageType === 'fault') {
             return $this->handleError($this->message->faultCode, $this->message->faultString);
         }
 
@@ -224,9 +218,8 @@ class ClientSSL extends Client
 
     /**
      * Debug output, if debug is enabled
-     * @param $message
      */
-    private function debugOutput($message)
+    private function debugOutput(string $message): void
     {
         if ($this->debug) {
             echo $message . PHP_EOL;

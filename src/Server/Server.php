@@ -10,17 +10,17 @@ use IXR\Message\Message;
 
 class Server
 {
-    protected $callbacks = [];
-    protected $message;
-    protected $capabilities;
+    protected array $callbacks = [];
+    protected ?Message $message;
+    protected array $capabilities;
 
     /**
      * @throws ServerException
      */
-    public function __construct($callbacks = false, $data = false, $wait = false)
+    public function __construct(array|false $callbacks = false, string|false $data = false, bool $wait = false)
     {
         $this->setCapabilities();
-        if ($callbacks) {
+        if (\is_array($callbacks)) {
             $this->callbacks = $callbacks;
         }
         $this->setCallbacks();
@@ -32,7 +32,7 @@ class Server
     /**
      * @throws ServerException
      */
-    public function serve($data = false)
+    public function serve(string|false $data = false): void
     {
         if (!$data) {
             if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -77,22 +77,26 @@ EOD;
         $this->output($xml);
     }
 
-    protected function call($methodname, $args)
+    /**
+     * @param array<mixed>|mixed|null $args
+     * @return Error|mixed
+     */
+    protected function call(string $methodName, mixed $args): mixed
     {
-        if (!$this->hasMethod($methodname)) {
-            return new Error(-32601, 'server error. requested method ' . $methodname . ' does not exist.');
+        if (!$this->hasMethod($methodName)) {
+            return new Error(-32601, \sprintf('server error. requested method %s does not exist.', $methodName));
         }
-        $method = $this->callbacks[$methodname];
+        $method = $this->callbacks[$methodName];
         // Perform the callback and send the response
 
-        if (is_array($args) && count($args) == 1) {
+        if (\is_array($args) && \count($args) === 1) {
             // If only one parameter just send that instead of the whole array
             $args = $args[0];
         }
 
         try {
             // Are we dealing with a function or a method?
-            if (is_string($method) && substr($method, 0, 5) === 'this:') {
+            if (\is_string($method) && str_starts_with($method, 'this:')) {
                 // It's a class method - check it exists
                 $method = substr($method, 5);
 
@@ -101,21 +105,21 @@ EOD;
 
             return call_user_func($method, $args);
         } catch (\BadFunctionCallException $exception) {
-            return new Error(-32601, "server error. requested callable '{$method}' does not exist.");
+            return new Error(-32601, \sprintf("server error. requested callable '%s' does not exist.", $method));
         }
 
     }
 
-    public function error($error, $message = false)
+    public function error(int|Error $error, ?string $message = null): void
     {
         // Accepts either an error object or an error code and message
-        if ($message && !is_object($error)) {
+        if (null !== $message && !($error instanceof Error)) {
             $error = new Error($error, $message);
         }
         $this->output($error->getXml());
     }
 
-    public function output($xml)
+    public function output(string $xml): void
     {
         $xml = '<?xml version="1.0"?>' . "\n" . $xml;
         $length = strlen($xml);
@@ -127,12 +131,12 @@ EOD;
         exit;
     }
 
-    protected function hasMethod($method)
+    protected function hasMethod(string $method): bool
     {
-        return in_array($method, array_keys($this->callbacks));
+        return \in_array($method, array_keys($this->callbacks));
     }
 
-    protected function setCapabilities()
+    protected function setCapabilities(): void
     {
         // Initialises capabilities array
         $this->capabilities = [
@@ -151,33 +155,36 @@ EOD;
         ];
     }
 
-    public function getCapabilities($args)
+    public function getCapabilities(array $args): array
     {
         return $this->capabilities;
     }
 
-    public function setCallbacks()
+    public function setCallbacks(): void
     {
         $this->callbacks['system.getCapabilities'] = 'this:getCapabilities';
         $this->callbacks['system.listMethods'] = 'this:listMethods';
         $this->callbacks['system.multicall'] = 'this:multiCall';
     }
 
-    public function listMethods($args)
+    /**
+     * @return array<string>
+     */
+    public function listMethods(array $args): array
     {
         // Returns a list of methods - uses array_reverse to ensure user defined
         // methods are listed before server defined methods
         return array_reverse(array_keys($this->callbacks));
     }
 
-    public function multiCall($methodcalls)
+    public function multiCall(array $methodCalls): array
     {
         // See http://www.xmlrpc.com/discuss/msgReader$1208
         $return = [];
-        foreach ($methodcalls as $call) {
+        foreach ($methodCalls as $call) {
             $method = $call['methodName'];
             $params = $call['params'];
-            if ($method == 'system.multicall') {
+            if ($method === 'system.multicall') {
                 $result = new Error(-32600, 'Recursive calls to system.multicall are forbidden');
             } else {
                 $result = $this->call($method, $params);
